@@ -1,11 +1,11 @@
 int value = 0;
-int X_value = 0;
-int Y_value = 0;
-int X_out = 0; 
-int Button_value = 0;
-int Buffer = 10;
-int PinX = A0;
-int PinY = A1;
+int x_value = 0;
+int y_value = 0;
+int x_out = 0; 
+int button_value = 0;
+int buffer = 10;
+int pinX = A0;
+int pinY = A1;
 void setup() {
   //pinMode(A0, INPUT);
   //pinMode(A1, INPUT);
@@ -16,11 +16,11 @@ void setup() {
   
 }
 
-int loop() {
-  X_value = analogRead(PinX);
+int Angle() {
+  X_value = analogRead(pinX);
  // Serial.print("X:");
-  //Serial.print(X_value, DEC);
-  if (X_value >= (1024/2-Buffer) && X_value <=1024/2+Buffer){
+  //Serial.print(x_value, DEC);
+  if (X_value >= (1024/2-buffer) && X_value <=1024/2+buffer){
    X_out = 512;
     }
   else{ X_out = X_value ;}
