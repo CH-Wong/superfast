@@ -10,8 +10,9 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
+/*
 #include <Servo.h>
-
+*/
 
 /* Set up RF Receiver
 * Default pins:
@@ -26,17 +27,19 @@ RF24 radio(9, 10); // CE, CSN
 // Select Channel
 const byte address[6] = "00001";
 
+/*
 // Set up Servomotor
 Servo steeringServo;  // create servo object to control a servo
 int pinServo = 7;
 int input_pos = 90;    // variable to store the servo position, start straight (90deg)
 int curr_pos = 90;
 int pos = 0;
-
+*/
 
 void setup() {
   Serial.begin(9600);
 
+/*
   // Initialize servo motor
   steeringServo.write(curr_pos);
   // Set up Joystick read-out.
@@ -52,7 +55,7 @@ void setup() {
     steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
-
+*/
   // Intitialize RF transceiving  
   radio.begin();
   radio.openReadingPipe(0, address);
@@ -61,12 +64,13 @@ void setup() {
 }
 
 void loop() {
-  if (radio.available()) {
-    char text[32] = "";
+ if (radio.available()) {
+    char text[] = "";
     radio.read(&text, sizeof(text));
     Serial.println(text);
-    
-    input_pos = text.toInt();
+
+    /*
+    radio.read(&input_pos, sizeof(text));
     
     if (input_pos > curr_pos && curr_pos < 180){
       curr_pos += 1;
@@ -77,15 +81,10 @@ void loop() {
     }
   
     steeringServo.write(curr_pos);
-    delay(10);
+    */
+    delay(5);
   
   }
-
-  
-  else{
-    Serial.println("off");
-  }
-
 
   
 }
