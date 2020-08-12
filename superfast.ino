@@ -12,7 +12,7 @@
 
   int pinX = A0;
   int pinY = A1;
-  int pinButton = 7;
+  int pinButton = 6;
 
   Joystick joystick(pinX, pinY, pinButton);
 
@@ -20,7 +20,7 @@
 
   Servo steeringServo;  // create servo object to control a servo
 
-  int pinServo = 9;
+  int pinServo = 7;
   int input_pos = 90;    // variable to store the servo position, start straight (90deg)
   int curr_pos = 90;
   int pos = 0;
