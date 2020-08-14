@@ -24,9 +24,9 @@
 RF24 radio(9, 10); // CE, CSN
 
 // Select Channel
-const byte address[6] = "00001";
+//const byte address[6] = "00001";
 
-// const uint64_t pipes[2] = {   0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+ const uint64_t pipes[2] = {   0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
 //const uint64_t pipe = 0xE6E6E6E6E6E6;
 
@@ -35,7 +35,7 @@ Servo steeringServo;  // create servo object to control a servo
 int pinServo = 7;
 int input_pos = 90;    // variable to store the servo position, start straight (90deg)
 int curr_pos = 90;
-bool off = false;
+bool off = False;
 void setup() {
   Serial.begin(9600);
 
@@ -58,7 +58,11 @@ void setup() {
 */
   // Intitialize RF transceiving  
   radio.begin();
-  radio.openWritingPipe(address);
+  
+  radio.openWritingPipe(pipes[0]);
+  radio.stopListening();
+  
+  radio.openReadingPipe(1,pipes[1]);
   radio.setPALevel(RF24_PA_LOW);
   radio.startListening();
 }
@@ -69,12 +73,11 @@ void loop() {
     radio.read(&text, sizeof(text));
     Serial.println(text);
 //    radio.read(&input_pos, sizeof(text));
- off = false;
  }
 
 else if (!off) {
-  Serial.println("off");
-  off = true;
+  Serial.println("off")
+  off = True;
 }
 //  if (input_pos > curr_pos && curr_pos < 180){
 //    curr_pos += 1;
