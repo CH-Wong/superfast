@@ -3,7 +3,7 @@
 #include <RF24.h>
 #include <Joystick.h>
 
-RF24 radio(9, 10); // CE, CSN     
+RF24 radio(9, 10); // CE, CSN
 const byte address[6] = "00001";     //Byte of array representing the address. This is the address where we will send the data. This should be same on the receiving side.
 
 int pinX = A0;
@@ -12,7 +12,7 @@ int pinButton = 7;
 int input_pos = 90;
 boolean button_state = 0;
 
-Joystick joystick(pinX, pinY, pinButton);    
+Joystick joystick(pinX, pinY, pinButton);
 
 
 void setup() {
@@ -24,14 +24,10 @@ void setup() {
 }
 
 void loop(){
-  
+
   input_pos = joystick.angle();
-  Serial.println(input_pos);
-  
-    
   const char text[] = "Suck a fuck";
-  radio.write(&text, sizeof(text));               
-  //radio.write(input_pos);                  //Sending the message to receiver
-  Serial.println(text); 
+  radio.write(&text, sizeof(text));
+  radio.write(&input_pos, sizeof(input_pos));                  //Sending the message to receiver
   delay(1000);
 }
