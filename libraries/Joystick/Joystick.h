@@ -1,6 +1,6 @@
 /*
   Morse.h - Library for flashing Morse code.
-  Created by David A. Mellis, November 2, 2007.
+  Created by Ya boi Cheef Kief, November 2, 2007.
   Released into the public domain.
 */
 #ifndef Joystick_h
@@ -12,9 +12,12 @@ class Joystick
 {
   public:
     Joystick(int pinX, int pinY, int pinButton);
-    int angle();
-    /*int speed();
-    bool honk();*/
+    int angleX();
+    int angleY();
+    int buttonState();
+    int getdataArray();
+    
+    
 
   private:
     int _pinX;

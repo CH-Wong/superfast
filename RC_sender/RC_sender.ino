@@ -6,7 +6,8 @@
 // Pins for Joystick
 int pinX = A0;
 int pinY = A1;
-int pinButton = 6;
+int pinButton = 5;
+int smash;
 
 Joystick joystick(pinX, pinY, pinButton);
 
@@ -22,10 +23,15 @@ byte address[6] = "node1";
 #define CE_PIN 8
 #define CSN_PIN 9
 
+// Initialize the angles of the joystick
+int input_posX = 90;    // variable to store the servo position, start straight (90deg)
+int input_posY = 90;    // variable to store the acceleration, start at 90deg
+int buttonState;
+int dataArray[3];
+
 RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
 
 bool send_confirm;
-
 
 void setup() {
 
@@ -46,12 +52,21 @@ void setup() {
 //====================
 
 void loop() {
-  input_pos = joystick.angle()
-
-  Serial.print("Data Sent: ");
-  Serial.print(input_pos);
+  input_posX = joystick.angleX();
+ buttonState = joystick.buttonState();
   
-  send_confirm = radio.write( &input_pos, sizeof(input_pos) );
+  //Serial.print("Data Sent: ");
+  smash = digitalRead(pinButton);
+  dataArray[0] = joystick.angleX();      
+  dataArray[1] = joystick.angleY();
+  dataArray[2] = joystick.buttonState();
+
+  Serial.print(dataArray[0]);
+  Serial.print(dataArray[1]);
+  Serial.print(dataArray[2]);
+  delay(50);
+  
+  send_confirm = radio.write( &dataArray, sizeof(dataArray) );
   if (send_confirm) {
       Serial.println("  Tx success");
   }
