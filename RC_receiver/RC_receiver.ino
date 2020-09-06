@@ -15,26 +15,35 @@ RF24 radio(CE_PIN, CSN_PIN);
 
 // Servo control setup
 #include <Servo.h>
+Servo steeringServo; 
+int pinServo = 7;
+int currAngle = 90;
 
-char dataReceived[10]; // this must match dataToSend in the TX
+int prevState[3];
+int joystickState[3]; // this must match dataToSend in the TX
 bool newData = false;
 
 //===========
 
 void setup() {
    Serial.begin(9600);
-   for (curr_pos = -1; curr_pos <= 90; curr_pos += 1) { // goes from 0 degrees to 180 degrees
+
+   // Set up Joystick read-out.
+   steeringServo.write(currAngle);
+   steeringServo.attach(pinServo);  // attaches the servo on pin 9 to the servo object
+   
+   for (currAngle = -1; currAngle <= 90; currAngle += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
-    steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
+    steeringServo.write(currAngle);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
 
   }
-  for (curr_pos = 181; curr_pos >= 90; curr_pos -= 1) { // goes from 180 degrees to 0 degrees
-    steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
+  for (currAngle = 181; currAngle >= 90; currAngle -= 1) { // goes from 180 degrees to 0 degrees
+    steeringServo.write(currAngle);              // tell servo to go to position in variable 'pos'
     delay(10);                       // waits 15ms for the servo to reach the position
   }
 
-    Serial.println("SimpleRx Starting");
+    Serial.println("RC Car Rx Starting");
     
     radio.begin();
     radio.setDataRate( RF24_250KBPS );
@@ -47,24 +56,34 @@ void setup() {
 //=============
 
 void loop() {
-    if ( radio.available() ) {
-        radio.read( &dataReceived, sizeof(dataReceived) );
-        newData = true;
-    }
-    getData();
-    showData();
+  if (radio.available()) {
+      radio.read( &joystickState, sizeof(joystickState) );
+      Serial.print(joystickState);
+      steering();    
+      accelerate();
+      honk();
+      showData();  
+  }
+        
+  delay(10);
 }
 
-//==============
+void steering() {
+//  steeringServo.write(joystickState[0]);
+  }
 
-void getData() {
+void accelerate() {
+}
 
+void honk() {
 }
 
 void showData() {
-    if (newData == true) {
-        Serial.print("Data received ");
-        Serial.println(dataReceived);
-        newData = false;
-    }
+  Serial.print("  Angle: ");
+  Serial.print(joystickState[0]);
+  Serial.print("  Accelerate: ");
+  Serial.print(joystickState[1]);
+  Serial.print("  Honk: ");
+  Serial.print(joystickState[2]);  
+  Serial.println("");
 }
