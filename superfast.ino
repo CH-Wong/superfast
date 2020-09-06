@@ -4,10 +4,6 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-
-
-
-
 int pinX = A0;
 int pinY = A1;
 int pinButton = 6;

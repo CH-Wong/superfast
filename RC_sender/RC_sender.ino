@@ -1,52 +1,93 @@
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
+// SimpleTx - the master or the transmitter
+
 #include <Joystick.h>
 
-<<<<<<< HEAD
-RF24 radio(9, 10); // CE, CSN     
-const uint64_t pipes[2] = {0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL}; //Byte of array representing the address. This is the address where we will send the data. This should be same on the receiving side.
-=======
-RF24 radio(9, 10); // CE, CSN
-const byte address[6] = "00001";     //Byte of array representing the address. This is the address where we will send the data. This should be same on the receiving side.
->>>>>>> 34a6e61205ea8f6772ba81a0194ec77a9357c5f7
-
+// Pins for Joystick
 int pinX = A0;
 int pinY = A1;
-int pinButton = 7;
-int input_pos = 90;
-boolean button_state = 0;
+int pinButton = 6;
 
 Joystick joystick(pinX, pinY, pinButton);
 
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+// RF address through which two modules communicate.
+byte address[6] = "node1";
+
+// Pins for nRF24L01
+#define CE_PIN 8
+#define CSN_PIN 9
+
+RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
+
+char dataToSend[10] = "Message 0";
+char txNum = '0';
+
+
+unsigned long currentMillis;
+unsigned long prevMillis;
+unsigned long txIntervalMillis = 1000; // send once per second
+
 
 void setup() {
-  Serial.begin(9600);
-  radio.begin();                  //Starting the Wireless communication
-  radio.stopListening();          //This sets the module as transmitter
- // radio.openWritingPipe(address); //Setting the address where we will send the data
-  radio.openWritingPipe(pipes[1]);
-  radio.openReadingPipe(1,pipes[0]);
-  radio.setPALevel(RF24_PA_LOW);  //You can set it as minimum or maximum depending on the distance between the transmitter and receiver.
- 
+
+    Serial.begin(9600);
+
+    Serial.println("SimpleTx Starting");
+
+    radio.begin();
+
+    radio.setDataRate( RF24_250KBPS );
+    radio.openWritingPipe(address);
+    radio.setPALevel(RF24_PA_LOW);
+    
+    radio.stopListening();
+    radio.setRetries(3,5); // delay, count
+
+
+
+
 }
 
-void loop(){
+//====================
 
-  input_pos = joystick.angle();
-<<<<<<< HEAD
-  Serial.println(input_pos);
-  
-    
-  const char text[32] = "S";
-  radio.write(&text, sizeof(text));               
-  //radio.write(input_pos);                  //Sending the message to receiver
-  Serial.println(text); 
-  delay(100);
-=======
-  const char text[] = "Suck a fuck";
-  radio.write(&text, sizeof(text));
-  radio.write(&input_pos, sizeof(input_pos));                  //Sending the message to receiver
-  delay(1000);
->>>>>>> 34a6e61205ea8f6772ba81a0194ec77a9357c5f7
+void loop() {
+    currentMillis = millis();
+    if (currentMillis - prevMillis >= txIntervalMillis) {
+        send();
+        prevMillis = millis();
+    }
+}
+
+//====================
+
+void send() {
+
+    bool rslt;
+    rslt = radio.write( &dataToSend, sizeof(dataToSend) );
+        // Always use sizeof() as it gives the size as the number of bytes.
+        // For example if dataToSend was an int sizeof() would correctly return 2
+
+    Serial.print("Data Sent ");
+    Serial.print(dataToSend);
+    if (rslt) {
+        Serial.println("  Acknowledge received");
+        updateMessage();
+    }
+    else {
+        Serial.println("  Tx failed");
+    }
+}
+
+//================
+
+void updateMessage() {
+        // so you can see that new data is being sent
+    txNum += 1;
+    if (txNum > '9') {
+        txNum = '0';
+    }
+    dataToSend[8] = txNum;
 }
