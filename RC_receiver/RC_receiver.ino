@@ -15,7 +15,7 @@ RF24 radio(CE_PIN, CSN_PIN);
 
 // Servo control setup
 #include <Servo.h>
-Servo steeringServo; 
+Servo steeringServo;
 int pinServo = 7;
 int currAngle = 90;
 
@@ -31,7 +31,7 @@ void setup() {
    // Set up Joystick read-out.
    steeringServo.write(currAngle);
    steeringServo.attach(pinServo);  // attaches the servo on pin 9 to the servo object
-   
+
    for (currAngle = -1; currAngle <= 90; currAngle += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     steeringServo.write(currAngle);              // tell servo to go to position in variable 'pos'
@@ -44,12 +44,12 @@ void setup() {
   }
 
     Serial.println("RC Car Rx Starting");
-    
+
     radio.begin();
     radio.setDataRate( RF24_250KBPS );
     radio.openReadingPipe(1, address);
     radio.setPALevel(RF24_PA_LOW);
-    
+
     radio.startListening();
 }
 
@@ -58,18 +58,23 @@ void setup() {
 void loop() {
   if (radio.available()) {
       radio.read( &joystickState, sizeof(joystickState) );
-      Serial.print(joystickState);
-      steering();    
+      steering();
       accelerate();
       honk();
-      showData();  
+      showData();
   }
-        
-  delay(10);
 }
 
 void steering() {
-//  steeringServo.write(joystickState[0]);
+  if (joystickState[0] > currAngle && currAngle < 180){
+    currAngle += 3;
+  }
+
+  else if (joystickState[0] < currAngle && currAngle > 0){
+    currAngle -= 3;
+  }
+  
+  steeringServo.write(currAngle);
   }
 
 void accelerate() {
@@ -84,6 +89,6 @@ void showData() {
   Serial.print("  Accelerate: ");
   Serial.print(joystickState[1]);
   Serial.print("  Honk: ");
-  Serial.print(joystickState[2]);  
+  Serial.print(joystickState[2]);
   Serial.println("");
 }
