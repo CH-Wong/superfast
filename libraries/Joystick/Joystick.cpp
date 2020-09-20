@@ -22,7 +22,7 @@ Joystick::Joystick(int pinX, int pinY, int pinButton)
    _pinY = pinY;
    _pinButton = pinButton;
 
-//pinMode(_pinButton, INPUT_PULLUP); This is for HONKYBOI
+pinMode(_pinButton, INPUT_PULLUP); This is for HONKYBOI
 }
 
 int Joystick::angleX()
