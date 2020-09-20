@@ -18,7 +18,6 @@ Joystick joystick(pinX, pinY, pinButton);
 
 // RF address through which two modules communicate.
 byte address[6] = "node1";
-
 // Pins for nRF24L01
 #define CE_PIN 8
 #define CSN_PIN 9

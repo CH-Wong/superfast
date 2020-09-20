@@ -63,8 +63,3 @@ int Joystick::buttonState()
     button_out = digitalRead(_pinButton);
     return button_out;
 }
-
-
-
-
-
