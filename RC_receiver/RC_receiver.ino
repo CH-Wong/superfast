@@ -19,21 +19,23 @@ Servo steeringServoR;
 Servo steeringServoL;
 int pinServoR = 7;
 int pinServoL = 6;
+int currAngle = 90;
+int outerAngle;
+int angleR;
+int angleL;
 
 int prevState[3];
 int joystickState[3]; // this must match dataToSend in the TX
-bool newData = false;
+bool readSuccess = false;
 
 // Ackermann Steering
-
+#include <Ackermann.h>
+Ackermann acker(1., 2., 5);
 
 void setup() {
   Serial.begin(9600);
   
   // Set up Joystick read-out.
-  steeringServoR.write(90);
-  steeringServoL.write(90);
-  
   steeringServoR.attach(pinServoR);  // attaches the servo on pin 9 to the servo object
   steeringServoL.attach(pinServoL);  // attaches the servo on pin 9 to the servo object
   
@@ -58,32 +60,45 @@ void loop() {
 }
 
 void steering() {
+  if (currAngle != joystickState[0]) {
+    if (joystickState[0] <= 90) {
+      outerAngle = acker.outerAngle(joystickState[0]);
+      angleR = joystickState[0];
+      angleL = outerAngle;
+    }
+    else if (joystickState[0] > 90) {
+      outerAngle = acker.outerAngle(joystickState[0]);
+      angleR = outerAngle;
+      angleL = joystickState[0];
+    }
   
-  steeringServoR.write(joystickState[0]);
-  steeringServoL.write(joystickState[0]);
+    steeringServoR.write(angleR);
+    steeringServoL.write(angleL);
 
-//  while (steeringServoR.read() != joystickState[0]){
-//    delay(10);
-//  }
-//
-//  while (steeringServoL.read() != joystickState[0]){
-//    delay(10);
-//  }
-//  Serial.print(joystickState[0]);
-//  Serial.println(steeringServoR.read());
-//  Serial.println(steeringServoL.read());
-//  Serial.println("passed");
+    currAngle = joystickState[0];
+    delay(50);
+    
   }
 
+
+}
 void accelerate() {
 }
 
 void honk() {
+  if (joystickState[2]){
+    Serial.println("HONK!");
+  }
 }
 
 void showData() {
-  Serial.print("  Angle: ");
+  Serial.print("  Input Angle: ");
   Serial.print(joystickState[0]);
+  Serial.print("  Angle R: ");
+  Serial.print(angleR);
+  Serial.print("  Angle L: ");
+  Serial.print(angleL);
+  
   Serial.print("  Accelerate: ");
   Serial.print(joystickState[1]);
   Serial.print("  Honk: ");

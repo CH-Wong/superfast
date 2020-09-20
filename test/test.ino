@@ -1,75 +1,52 @@
+int angle;
+float angleRad;
+float ackAngle;
+int outputAngle;
 
-// RC Car Rx
-
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
-
-#define CE_PIN 8
-#define CSN_PIN 9
-
-//address through which two modules communicate.
-byte address[6] = "node1";
-
-RF24 radio(CE_PIN, CSN_PIN);
-
-// Servo control setup
-#include <Servo.h>
-Servo steeringServo;
-int pinServoR = 7;
-int pinServoL = 6;
-int currAngle = 0;
-
-int prevState[3];
-int joystickState[3]; // this must match dataToSend in the TX
-bool newData = false;
-
-// Ackermann Steering
-
+#include <math.h>
 
 void setup() {
    Serial.begin(9600);
-
-   // Set up Joystick read-out.
-   steeringServo.write(currAngle);
-   steeringServo.attach(pinServoR);
-
-    Serial.println("RC Car Rx Starting");
-
-    radio.begin();
-    radio.setDataRate( RF24_250KBPS );
-    radio.openReadingPipe(1, address);
-    radio.setPALevel(RF24_PA_LOW);                    
-
-    radio.startListening();
+    Serial.println("");
+    for (int angle = 5; angle <= 80; angle++) {
+      ackermann(angle, 1., 2.);  
+    }
+    
 }
 
 void loop() {
-  if (radio.available()) {
-      radio.read( &joystickState, sizeof(joystickState) );
-      steering();
-      accelerate();
-      honk();
-      showData();
-  }
+
 }
 
-void steering() {
-  steeringServo.write(joystickState[0]);
-  }
+float ackermann(int angle, int L, int W) {
+//  Serial.print("Input Angle: ");
+//  Serial.print(angle);
+//
+//      Serial.println("");
+  
+  angleRad = ((angle * 71.) / 4068.)  ;
+//  Serial.print("Input Angle Rad: ");
+//  Serial.print(angleRad);
 
-void accelerate() {
+//      Serial.println("");
+      
+  ackAngle = atan( (L * tan(angleRad)) / ((W * tan(angleRad)) + L));
+//  Serial.print("Ackerman Angle: ");
+//  Serial.print(ackAngle);
+  
+//  Serial.println("");
+  
+  outputAngle = (int) ((ackAngle * 4068) / 71);
+//  Serial.print("Output Angle: ");
+//  Serial.print(outputAngle);
+Serial.println("");
+Serial.print(angle);
+Serial.print(outputAngle);
+
 }
 
-void honk() {
-}
 
-void showData() {
-  Serial.print("  Angle: ");
-  Serial.print(joystickState[0]);
-  Serial.print("  Accelerate: ");
-  Serial.print(joystickState[1]);
-  Serial.print("  Honk: ");
-  Serial.print(joystickState[2]);
-  Serial.println("");
-}
+
+//radians = (degrees * 71) / 4068
+
+//degrees = (radians * 4068) / 71
