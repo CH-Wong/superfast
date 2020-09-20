@@ -14,7 +14,7 @@ int y_value = 0;
 int x_out = 0;
 int y_out = 0;
 int button_out;
-int buffer = 20;
+int buffer = 5;
 
 Joystick::Joystick(int pinX, int pinY, int pinButton)
 {
