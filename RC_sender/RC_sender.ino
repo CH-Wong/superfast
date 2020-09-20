@@ -61,7 +61,7 @@ void loop() {
   Serial.print(dataArray[0]);
   Serial.print(dataArray[1]);
   Serial.print(dataArray[2]);
-  delay(50);
+  delay(10);
   
   send_confirm = radio.write( &dataArray, sizeof(dataArray) );
   if (send_confirm) {
