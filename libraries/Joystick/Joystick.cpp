@@ -61,5 +61,12 @@ int Joystick::angleY()
 int Joystick::buttonState()
 {
     button_out = digitalRead(_pinButton);
-    return button_out;
+    if(button_out = 1){
+      return 0;
+    }
+    else
+    {
+    return 1;  
+    }
+
 }
