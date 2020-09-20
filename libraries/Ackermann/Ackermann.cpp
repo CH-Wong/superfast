@@ -10,7 +10,7 @@
 
 int min_angle = 5;
 
-Joystick::Joystick(float width, float length)
+Ackermann::Ackermann(float width, float length)
 {
   _width = width;
   _length = length;
@@ -18,7 +18,7 @@ Joystick::Joystick(float width, float length)
 //pinMode(_pinButton, INPUT_PULLUP); This is for HONKYBOI
 }
 
-int Joystick::outerAngle(int _angle)
+int Ackermann::outerAngle(int _angle)
 {
    if (abs(_angle) > min_angle)
     {
