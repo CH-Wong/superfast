@@ -23,7 +23,8 @@ int prevState[3];
 int joystickState[3]; // this must match dataToSend in the TX
 bool newData = false;
 
-//===========
+// Ackermann Steering
+
 
 void setup() {
    Serial.begin(9600);
@@ -48,12 +49,10 @@ void setup() {
     radio.begin();
     radio.setDataRate( RF24_250KBPS );
     radio.openReadingPipe(1, address);
-    radio.setPALevel(RF24_PA_LOW);
+    radio.setPALevel(RF24_PA_LOW);                    
 
     radio.startListening();
 }
-
-//=============
 
 void loop() {
   if (radio.available()) {

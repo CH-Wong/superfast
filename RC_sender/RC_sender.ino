@@ -49,8 +49,6 @@ void setup() {
     radio.setRetries(3,5); // delay, count
 }
 
-//====================
-
 void loop() {
   input_posX = joystick.angleX();
  buttonState = joystick.buttonState();
