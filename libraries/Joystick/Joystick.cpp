@@ -38,7 +38,7 @@ int Joystick::angleX()
        x_out = x_value ;
      }
 
-     return map(x_out,0,1023,1000,2000);
+     return map(x_out,0,1023,0,180);
 
 }
 
