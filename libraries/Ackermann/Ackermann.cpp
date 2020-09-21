@@ -8,26 +8,34 @@
 #include "Ackermann.h"
 #include "math.h"
 
-int min_angle = 5;
+float angleRad;
+int inputAngle;
+float outputAngle;
 
-Ackermann::Ackermann(float width, float length)
+Ackermann::Ackermann(float width, float length, int minAngle)
 {
   _width = width;
   _length = length;
-
-//pinMode(_pinButton, INPUT_PULLUP); This is for HONKYBOI
+  _minAngle = minAngle;
 }
 
-int Ackermann::outerAngle(int _angle)
-{
-   if (abs(_angle) > min_angle)
-    {
+int Ackermann::outerAngle(int _angle) {
+  inputAngle = _angle - 90;
+    // _angle input is from 0 to 180 deg.
+   if (abs(inputAngle) < _minAngle) {
      return _angle;
     }
 
-   else
-     {
-       return  (int) 90 - atan((_width/_length) + tan(90 - _angle));
+   else {
+       angleRad = (abs(inputAngle) * 71.) / 4068.;
+       outputAngle = ((atan( (_length * tan(angleRad)) / ((_width * tan(angleRad)) + _length )) * 4068) / 71);
+
+       if (_angle < 90) {
+         return (int) 90 - outputAngle;
+       }
+       else if (_angle > 90) {
+         return (int) 90 + outputAngle;
+       }
      }
 
 }
