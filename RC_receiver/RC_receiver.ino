@@ -5,8 +5,12 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define CE_PIN 8
-#define CSN_PIN 9
+#define refreshDelay 100 //ms
+
+// Pins for nRF24L01
+#define CE_PIN 7
+#define CSN_PIN 8
+// MOSI = 11, MISO = 12, SCK = 13
 
 //address through which two modules communicate.
 byte address[6] = "node1";
@@ -51,12 +55,11 @@ void setup() {
 
 void loop() {
   if (radio.available()) {
-      radio.read( &joystickState, sizeof(joystickState) );
-      steering();
-      accelerate();
-      honk();
-      showData();
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
   }
+  delay(refreshDelay);
 }
 
 void steering() {
