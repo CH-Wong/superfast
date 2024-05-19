@@ -1,75 +1,140 @@
-include <Joystick.h>
-#include <Servo.h>
+//RF Setup Tx setup
 #include <SPI.h>
 #include <nRF24L01.h>
-#include <RF24.h>
+#include "src/RF24/RF24.h"
 
-int pinX = A0;
-int pinY = A1;
-int pinButton = 6;
+#define refreshDelay 100 //ms
 
-Joystick joystick(pinX, pinY, pinButton);
+// RF address through which two modules communicate.
+byte address[6] = "node1";
+// Pins for nRF24L01
+#define CE_PIN 7
+#define CSN_PIN 8
+// MOSI = 11, MISO = 12, SCK = 13
 
-// Set up Servo-motor control
+RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
 
-Servo steeringServo;  // create servo object to control a servo
-
-int pinServo = 7;
-int input_pos = 90;    // variable to store the servo position, start straight (90deg)
-int curr_pos = 90;
-int pos = 0;
-
-RF24 radio(7, 8); // CE, CSN
-
-const byte address[6] = "00001";
-
+bool send_confirm;
 
 void setup() {
-  Serial.begin(9600);
 
-  steeringServo.write(curr_pos);
-  // Set up Joystick read-out.
-  steeringServo.attach(pinServo);  // attaches the servo on pin 9 to the servo object
+    Serial.begin(9600);
+    Serial.println("Joystick Tx Starting");
 
-   for (curr_pos = -1; curr_pos <= 90; curr_pos += 1) { // goes from 0 degrees to 180 degrees
-    // in steps of 1 degree
-    steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
-    delay(10);                       // waits 15ms for the servo to reach the position
-
-  }
-  for (curr_pos = 181; curr_pos >= 90; curr_pos -= 1) { // goes from 180 degrees to 0 degrees
-    steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
-    delay(10);                       // waits 15ms for the servo to reach the position
-  }
-
-  radio.begin();
-  radio.openReadingPipe(0, address);
-  radio.setPALevel(RF24_PA_MIN);
-  radio.startListening();
-
-
+    radio.begin();
+    radio.openWritingPipe(address);
+    radio.setPALevel(RF24_PA_MIN);
+//    radio.setDataRate(RF24_250KBPS);
+    radio.stopListening();
+//    radio.setRetries(3,5); // delay, count
 }
 
 void loop() {
-  input_pos = joystick.angle();
-  if (input_pos > curr_pos && curr_pos < 180){
-    curr_pos += 1;
-  }
+  const char text[] = "Hello World";
+  send_confirm = radio.write(&text, sizeof(text));
 
-  else if (input_pos < curr_pos && curr_pos > 0){
-    curr_pos -= 1;
-  }
-
-  steeringServo.write(curr_pos);
+  Serial.print(dataArray[0]);
+  Serial.print(dataArray[1]);
+  Serial.print(dataArray[2]);
   delay(10);
-
-  Serial.print(curr_pos);
-  Serial.print("    ");
-  Serial.println(input_pos);
-
-  if (radio.available()) {
-    char text[32] = "";
-    radio.read(&text, sizeof(text));
-    Serial.println(text);
-
+  
+  if (send_confirm) {
+      Serial.println("Tx success");
+  }
+  else {
+      Serial.println("Tx failed");
+  }
+  delay(refreshDelay);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//// RC Car Tx
+//// Joystick Read-out setup
+//
+//#include <Joystick.h>
+//
+//// Pins for Joystick
+//#define pinX A0
+//#define pinY A1
+//#define pinButton 5
+//int smash;
+//
+//Joystick joystick(pinX, pinY, pinButton);
+//
+////RF Setup Tx setup
+//#include <SPI.h>
+//#include <nRF24L01.h>
+//#include <RF24.h>
+//
+//#define refreshDelay 100 //ms
+//
+//// RF address through which two modules communicate.
+//byte address[6] = "node1";
+//
+//// Pins for nRF24L01
+//#define CE_PIN 7
+//#define CSN_PIN 8
+//// MOSI = 11, MISO = 12, SCK = 13
+//
+//// Initialize the angles of the joystick
+//int input_posX = 90;    // variable to store the servo position, start straight (90deg)
+//int input_posY = 90;    // variable to store the acceleration, start at 90deg
+//int buttonState;
+//int dataArray[3];
+//
+//RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
+//
+//bool send_confirm;
+//
+//void setup() {
+//
+//    Serial.begin(9600);
+//
+//    Serial.println("Joystick Tx Starting");
+//
+//    radio.begin();
+//
+//    radio.setDataRate( RF24_250KBPS );
+//    radio.openWritingPipe(address);
+//    radio.setPALevel(RF24_PA_LOW);
+//    
+//    radio.stopListening();
+//    radio.setRetries(3,5); // delay, count
+//}
+//
+//void loop() {
+//  dataArray[0] = joystick.angleX();      
+//  dataArray[1] = joystick.angleY();
+//  dataArray[2] = joystick.buttonState();
+//
+//  Serial.print("Data Sent: ");
+//  Serial.print(dataArray[0]);
+//  Serial.print("\t");
+//  Serial.print(dataArray[1]);
+//  Serial.print("\t");
+//  Serial.print(dataArray[2]);
+//  Serial.print("\t");
+//  delay(refreshDelay);
+//  
+//  send_confirm = radio.write( &dataArray, sizeof(dataArray) );
+//  if (send_confirm) {
+//      Serial.println("Tx success");
+//  }
+//  else {
+//      Serial.println("Tx failed");
+//  }
+//
+//}
