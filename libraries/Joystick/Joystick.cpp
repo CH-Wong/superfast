@@ -14,7 +14,7 @@ int y_value = 0;
 int x_out = 0;
 int y_out = 0;
 int button_out;
-int buffer = 10;
+int buffer = 5;
 
 Joystick::Joystick(int pinX, int pinY, int pinButton)
 {
@@ -22,7 +22,7 @@ Joystick::Joystick(int pinX, int pinY, int pinButton)
    _pinY = pinY;
    _pinButton = pinButton;
 
-//pinMode(_pinButton, INPUT_PULLUP); This is for HONKYBOI
+   pinMode(_pinButton, INPUT_PULLUP); //This is for HONKYBOI
 }
 
 int Joystick::angleX()
@@ -61,10 +61,5 @@ int Joystick::angleY()
 int Joystick::buttonState()
 {
     button_out = digitalRead(_pinButton);
-    return button_out;
+    return !button_out;
 }
-
-
-
-
-

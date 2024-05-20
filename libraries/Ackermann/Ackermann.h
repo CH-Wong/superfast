@@ -11,12 +11,13 @@
 class Ackermann
 {
   public:
-    Ackermann(float width, float length);
+    Ackermann(float width, float length, int minAngle);
     int outerAngle(int angle);
   private:
-    float width;
-    float length;
-    int angle;
+    float _width;
+    float _length;
+    int _minAngle;
+    int _angle;
 };
 
 #endif
