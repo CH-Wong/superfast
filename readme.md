@@ -1,5 +1,9 @@
 # Chun's Notes
 
+## NRF 24
+
+https://www.youtube.com/watch?v=Z7_Cy66Vnrc
+
 ## Installing Arduino on VSCode
 - Arduino install not needed
 - Install extension

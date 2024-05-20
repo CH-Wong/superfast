@@ -1,6 +1,5 @@
 {
-    "board": "arduino:avr:uno",
-    "port": "COM3",
-    "sketch": "superfast.ino",
-    "output": "../ArduinoOutput"
+    "board": "arduino:avr:nano",
+    "port": "COM4",
+    "sketch": "superfast.ino"
 }
