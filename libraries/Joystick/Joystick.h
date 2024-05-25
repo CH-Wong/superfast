@@ -14,10 +14,8 @@ class Joystick
     Joystick(int pinX, int pinY, int pinButton);
     int angleX();
     int angleY();
+    int readAngle(int pin);
     int buttonState();
-    int getdataArray();
-    
-    
 
   private:
     int _pinX;
