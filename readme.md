@@ -3,8 +3,10 @@
 ## Arduino control of motor
 https://howtomechatronics.com/tutorials/arduino/arduino-brushless-motor-control-tutorial-esc-bldc/
 
-## NRF 24
+## Circuit diagram
+https://www.circuit-diagram.org/editor/c/543b9521dab945ef87ee19d87c42123d
 
+## NRF 24
 https://www.youtube.com/watch?v=Z7_Cy66Vnrc
 
 ## Installing Arduino on VSCode
