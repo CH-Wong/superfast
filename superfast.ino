@@ -6,7 +6,7 @@
 #define CE_PIN 7
 #define CSN_PIN 8
 // MOSI = 11, MISO = 12, SCK = 13
-#define refreshDelay 1000 //ms
+#define refreshDelay 0 //ms
 #define SPI_SPEED 10000000
 
 // instantiate an object for the nRF24L01 transceiver
@@ -31,23 +31,18 @@ bool role = false;  // true = TX role, false = RX role
 
 Joystick joystick(pinX, pinY, pinButton);
 
-//   // Attach the ESC on pin 9
-//   ESC.attach(9,700,2000); // (pin, min pulse width, max pulse width in microseconds) 
-//   ESC.write(90);
-
 // Initialize the angles of the joystick
-int input_posX = 90;    // variable to store the servo position, start straight (90deg)
-int input_posY = 90;    // variable to store the acceleration, start at 90deg
-int buttonState;
 int dataArray[3];
 
 #include <Servo.h>
 #define ESC_PIN 9
+int curr_pos = 90;
+int pos = 0;
 
-Servo ESC;     // create servo object to control the ESC
+// create servo object to control the ESC
+Servo steeringServo;
 
 void setup() {
- 
   Serial.begin(115200);
   while (!Serial) {
     // some boards need to wait to ensure access to serial over USB
@@ -96,9 +91,10 @@ void setup() {
   } else {
     radio.startListening();  // put radio in RX mode
 
-  // Attach the ESC on pin 9
-  ESC.attach(9,700,2000); // (pin, min pulse width, max pulse width in microseconds) 
-  ESC.write(90);
+  // Attach the Servo motor to controller.
+  steeringServo.attach(ESC_PIN);  // attaches the servo on pin 9 to the servo object
+  // steeringServo.steeringServo(ESC_PIN,700,2000); // (pin, min pulse width, max pulse width in microseconds) 
+  steeringServo.write(curr_pos);
 
   }
  
@@ -114,6 +110,7 @@ void loop() {
  
   if (role) {
     // This device is a TX node
+    // Prepare data for transmission
     dataArray[0] = joystick.angleX();      
     dataArray[1] = joystick.angleY();
     dataArray[2] = joystick.buttonState();
@@ -149,22 +146,27 @@ void loop() {
     if (radio.available(&pipe)) {              // is there a payload? get the pipe number that recieved it
       uint8_t bytes = radio.getPayloadSize();  // get the size of the payload
       radio.read(&dataArray, bytes);             // fetch payload from FIFO
-      Serial.print(F("Received "));
-      Serial.print(bytes);  // print the size of the payload
-      Serial.print(F(" bytes on pipe "));
-      Serial.print(pipe);  // print the pipe number
-      Serial.print(F(": "));
-      Serial.print(dataArray[0]);  // print the payload's value
-      Serial.print("\t");
-      Serial.print(dataArray[1]);  // print the payload's value
-      Serial.print("\t");
-      Serial.println(dataArray[2]);  // print the payload's value
+      int angleX = dataArray[0];
+      int angleY = dataArray[1];
+      int buttonState = dataArray[2];
 
-      if (dataArray[2]) {
-        honk();
-      }
+      // Serial.print(F("Received "));
+      // Serial.print(bytes);  // print the size of the payload
+      // Serial.print(F(" bytes on pipe "));
+      // Serial.print(pipe);  // print the pipe number
+      // Serial.print(F(": "));
+      Serial.print(angleX);  // print the payload's value
+      Serial.print("\t");
+      Serial.print(angleY);  // print the payload's value
+      Serial.print("\t");
+      Serial.println(buttonState);  // print the payload's value
 
-      ESC.write(dataArray[1]);    // Send Y-axis  signal to the ESC
+      curr_pos = steer(angleY, curr_pos);
+      accelerate(angleX);
+      honk(buttonState);
+
+      // to make this example readable in the serial monitor
+      delay(refreshDelay);  // slow transmissions down by 1 second
     }
   }  // role
  
@@ -190,210 +192,32 @@ void loop() {
  
 }  // loop
 
-void honk() {
-  if (joystickState[2]){
+int steer(int angle, int curr_pos) {
+  // Slowly change the angle instead of sending it immediately
+  if (angle > curr_pos && curr_pos < 180){
+    curr_pos += 1;
+  }
+
+  else if (angle < curr_pos && curr_pos > 0){
+    curr_pos -= 1;
+  }
+
+  Serial.print(curr_pos);
+  Serial.print("\t");
+  Serial.println(angle);
+  steeringServo.write(curr_pos);
+  delay(15);
+
+  return curr_pos;
+}
+
+void honk(bool buttonState) {
+  if (buttonState){
     Serial.println("HONK!");
   }
 }
 
-
-// // Servo control setup
-// #include <Servo.h>
-// Servo steeringServoR;
-// Servo steeringServoL;
-// int pinServoR = 7;
-// int pinServoL = 6;
-// int currAngle = 90;
-// int outerAngle;
-// int angleR;
-// int angleL;
-
-// int prevState[3];
-// int joystickState[3]; // this must match dataToSend in the TX
-// bool readSuccess = false;
-
-// // Ackermann Steering
-// #include <Ackermann.h>
-// Ackermann acker(1., 2., 5);
-
-// void setup() {
-//   Serial.begin(9600);
-  
-//   // Set up Joystick read-out.
-//   steeringServoR.attach(pinServoR);  // attaches the servo on pin 9 to the servo object
-//   steeringServoL.attach(pinServoL);  // attaches the servo on pin 9 to the servo object
-  
-//   Serial.println("RC Car Rx Starting");
-  
-//   radio.begin();
-//   radio.setDataRate( RF24_250KBPS );
-//   radio.openReadingPipe(1, address);
-//   radio.setPALevel(RF24_PA_LOW);                    
-  
-//   radio.startListening();
-// }
-
-// void loop() {
-//   if (radio.available()) {
-//     char text[32] = "";
-//     radio.read(&text, sizeof(text));
-//     Serial.println(text);
-//   }
-//   delay(refreshDelay);
-// }
-
-// void steering() {
-//   if (currAngle != joystickState[0]) {
-//     if (joystickState[0] <= 90) {
-//       outerAngle = acker.outerAngle(joystickState[0]);
-//       angleR = joystickState[0];
-//       angleL = outerAngle;
-//     }
-//     else if (joystickState[0] > 90) {
-//       outerAngle = acker.outerAngle(joystickState[0]);
-//       angleR = outerAngle;
-//       angleL = joystickState[0];
-//     }
-  
-//     steeringServoR.write(angleR);
-//     steeringServoL.write(angleL);
-
-//     currAngle = joystickState[0];
-//     delay(50);
-    
-//   }
-
-
-// }
-// void accelerate() {
-// }
-
-
-
-// void showData() {
-//   Serial.print("  Input Angle: ");
-//   Serial.print(joystickState[0]);
-//   Serial.print("  Angle R: ");
-//   Serial.print(angleR);
-//   Serial.print("  Angle L: ");
-//   Serial.print(angleL);
-  
-//   Serial.print("  Accelerate: ");
-//   Serial.print(joystickState[1]);
-//   Serial.print("  Honk: ");
-//   Serial.print(joystickState[2]);
-//   Serial.println("");
-// }
-
-
-// /*
-//         Arduino Brushless Motor Control
-//      by Dejan, https://howtomechatronics.com
-// */
-
-// #include <Servo.h>
-// #include <Joystick.h>
-// #define pinX A0
-// #define pinY A1
-// #define pinButton 5
-// Servo ESC;     // create servo object to control the ESC
-// Joystick joystick(pinX, pinY, pinButton);
-// int potValue;  // value from the analog pin
-// int input_posX = 90;    // variable to store the servo position, start straight (90deg)
-// int input_posY = 90;    // variable to store the acceleration, start at 90deg
-// int buttonState;
-// int Value = 0;
-
-// void setup() {
-//   Serial.begin(9600);
-//   Serial.println("Ey boss");
-//   // Attach the ESC on pin 9
-//   ESC.attach(9,700,2000); // (pin, min pulse width, max pulse width in microseconds) 
-//   ESC.write(90);
- 
-// }
-
-// void loop() {
-//  Value =    joystick.angleY();
-  
-//   Serial.println(Value);
-//   ESC.write(Value);    // Send the signal to the ESC
-// }
-
-
-
-// #include <Joystick.h>
-// #include <Servo.h>
-// #include <SPI.h>
-// #include <nRF24L01.h>
-// #include <RF24.h>
-
-// int pinX = A0;
-// int pinY = A1;
-// int pinButton = 6;
-
-// Joystick joystick(pinX, pinY, pinButton);
-
-// // Set up Servo-motor control
-
-// Servo steeringServo;  // create servo object to control a servo
-
-// int pinServo = 7;
-// int input_pos = 90;    // variable to store the servo position, start straight (90deg)
-// int curr_pos = 90;
-// int pos = 0;
-
-// RF24 radio(7, 8); // CE, CSN
-
-// const byte address[6] = "00001";
-
-
-// void setup() {
-//   Serial.begin(9600);
-
-//   steeringServo.write(curr_pos);
-//   // Set up Joystick read-out.
-//   steeringServo.attach(pinServo);  // attaches the servo on pin 9 to the servo object
-
-//    for (curr_pos = -1; curr_pos <= 90; curr_pos += 1) { // goes from 0 degrees to 180 degrees
-//     // in steps of 1 degree
-//     steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
-//     delay(10);                       // waits 15ms for the servo to reach the position
-
-//   }
-//   for (curr_pos = 181; curr_pos >= 90; curr_pos -= 1) { // goes from 180 degrees to 0 degrees
-//     steeringServo.write(curr_pos);              // tell servo to go to position in variable 'pos'
-//     delay(10);                       // waits 15ms for the servo to reach the position
-//   }
-
-//   radio.begin();
-//   radio.openReadingPipe(0, address);
-//   radio.setPALevel(RF24_PA_MIN);
-//   radio.startListening();
-
-
-// }
-
-// void loop() {
-//   input_pos = joystick.angle();
-//   if (input_pos > curr_pos && curr_pos < 180){
-//     curr_pos += 1;
-//   }
-
-//   else if (input_pos < curr_pos && curr_pos > 0){
-//     curr_pos -= 1;
-//   }
-
-//   steeringServo.write(curr_pos);
-//   delay(10);
-
-//   Serial.print(curr_pos);
-//   Serial.print("    ");
-//   Serial.println(input_pos);
-
-//   if (radio.available()) {
-//     char text[32] = "";
-//     radio.read(&text, sizeof(text));
-//     Serial.println(text);
-
-// }
+void accelerate(int angle) {
+  Serial.print("Acceleration Data: ");
+  Serial.println(angle);
+}
