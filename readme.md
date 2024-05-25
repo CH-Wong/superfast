@@ -1,5 +1,8 @@
 # Chun's Notes
 
+## Arduino control of motor
+https://howtomechatronics.com/tutorials/arduino/arduino-brushless-motor-control-tutorial-esc-bldc/
+
 ## NRF 24
 
 https://www.youtube.com/watch?v=Z7_Cy66Vnrc
