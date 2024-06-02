@@ -182,21 +182,7 @@ void loop() {
       // Honk once if the buttonstate was high 
       honk(buttonState);
 
-      // This part makes sure that the hardware does not need to wait for the next refresh, but continously
-      // gets the updated commands. 
-      unsigned long start_timer = micros();                // start the timerreport
-      unsigned long end_timer = micros();                  // end the timer
-      unsigned long diff = end_timer - start_timer;
-      while (diff < refreshDelay) {
-        // some boards need to wait to ensure access to serial over USB
-        // Update the hardware settings
-        curr_pos = steer(angleX, curr_pos);
-
-        delay(15); // minimum delay required for setting servos/ESCs
-        
-        end_timer = micros();                  // end the timer  
-        diff = end_timer - start_timer;      
-      }
+      steeringServo.write(angleX);
 
     }
   }  // role
@@ -222,22 +208,6 @@ void loop() {
   }
 
 }  // loop
-
-int steer(int angle, int curr_pos) {
-  // Slowly change the angle instead of sending it immediately
-
-  // Add one to the current angle if the input angle is larger than current angle. Limit it to 180deg.
-  if (angle > curr_pos && curr_pos < 180) {
-    curr_pos += 1;
-  }
-  // Subtract one of the current angle if the input angle is smaller than the current angle, limit to 0deg.
-  else if (angle < curr_pos && curr_pos > 0) {
-    curr_pos -= 1;
-  }
-
-  steeringServo.write(curr_pos);
-  return curr_pos;
-}
 
 void honk(bool buttonState) {
   if (buttonState) {
