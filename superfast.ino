@@ -55,6 +55,8 @@ void setup() {
     // some boards need to wait to ensure access to serial over USB
   }
 
+  pinMode(pinButton, OUTPUT);
+
   // initialize the transceiver on the SPI bus
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!!"));
@@ -240,6 +242,9 @@ int steer(int angle, int curr_pos) {
 void honk(bool buttonState) {
   if (buttonState) {
     Serial.println("HONK!");
+    digitalWrite(pinButton, HIGH); // sets the digital pin 13 on
+  } else {
+    digitalWrite(pinButton, LOW); // sets the digital pin 13 on    
   }
 }
 
